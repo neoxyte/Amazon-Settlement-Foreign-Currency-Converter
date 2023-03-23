@@ -29,7 +29,7 @@ dtypes = {
     "promotion-id": "category",
 }
 
-API_KEY = 'dccb484c0029bcd76c5b3a87' #API key for exchangerate-api.com
+API_KEY = 'HIDDEN' #API key for exchangerate-api.com
 
 def get_flatfile_input():
     '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface. Returns a list c'''
@@ -96,15 +96,6 @@ def output_to_txt(converted_df: pd.DataFrame, filename):
     '''Outputs the dataframe to tab delimited text file using the prefix + filename'''
     converted_df.to_csv("Converted_" + filename + ".txt", sep = '\t', index=False)
     sg.popup('File saved as Converted_' + filename + '.txt')
-    '''
-    layout = [[sg.Text('File saved as "Converted_' + filename + ".txt")],
-          [sg.Button('Thanks!')]]
-    window = sg.Window('Success!', layout)
-    while True:
-        event, values = window.read()
-        if event == sg.WIN_CLOSED or event == 'Thanks!':
-            break
-            '''
 
 def main():
     settlement_df = get_flatfile_input()
