@@ -1,6 +1,8 @@
 venv/
 Currency Converter 2023-03-23 v1.0/
+*/
 *.pyc
 *.exe
 *.csv
 *.txt
+*.spec
