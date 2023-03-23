@@ -7,7 +7,7 @@ dtypes = {
     "settlement-start-date": "category",
     "settlement-end-date": "category",
     "deposit-date": "category",
-    "total-amount": "category",
+    "total-amount": "float64",
     "currency": "category",
     "transaction-type": "category",
     "order-id": "category",
@@ -70,8 +70,25 @@ def ask_for_currency_type():
         sg.popup_error("Unknown error")
         raise Exception("Unknown error!")
 
-def get_exchange_rate(currency_type):
+def ask_for_deposit_total():
+    '''Asks for the deposited amount in USD''' 
+    layout = [[sg.Text('Deposit Amount (USD):')],
+            [sg.InputText()],
+            [sg.Button('Submit')]]
+    window = sg.Window('Window Title', layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+        if event == 'Submit':
+            #print(f'You entered: {values[0]}')
+            break
+    window.close()
+    return values[0]
+
+def get_exchange_rate_old(currency_type):
     '''Gets the current exchange rate from exchangerate-api.com'''
+    #no longer using this
     if currency_type == "CAD":
         url = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/CAD"
         response = requests.get(url)
@@ -87,6 +104,11 @@ def get_exchange_rate(currency_type):
     else:
         raise Exception("Error, unable to convert currency")
 
+def get_exchange_rate(deposit_amount, settlement_df):
+    '''Gets the exchange rate used based on a USD deposit total.'''
+    foreign_total = settlement_df['total-amount'].sum()
+    return deposit_amount / foreign_total
+
 def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate) -> pd.DataFrame:
     '''Accepts the settlement flatfile dataframe and exchange rate as arguments'''
     settlement_dataframe['amount'] = settlement_dataframe['amount'] * exchange_rate
@@ -101,8 +123,10 @@ def main():
     settlement_df = get_flatfile_input()
     file_name = settlement_df[1] #gets the file name
     settlement_df = settlement_df[0] #overwrites the variable now that we have the filename
-    currency_type = ask_for_currency_type()
-    exchange_rate = get_exchange_rate(currency_type)
+    #currency_type = ask_for_currency_type()
+    deposit_total = float(ask_for_deposit_total())
+    #exchange_rate = get_exchange_rate(currency_type)
+    exchange_rate = get_exchange_rate(deposit_total, settlement_df)
     converted_df = convert_currency(settlement_df, exchange_rate)
     output_to_txt(converted_df, file_name)
     
