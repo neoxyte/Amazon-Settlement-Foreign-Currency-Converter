@@ -60,12 +60,14 @@ def ask_for_currency_type():
     if currency_selection[0] == currency_selection[1]:
         print(currency_selection[0])
         print(currency_selection[1])
-        raise Exception("Error, invalid selection")
+        sg.popup_error("Error, invalid selection. Please select only one currency. Try again.")
+        raise Exception("Error, both currencies selected.")
     elif currency_selection[0]:
         return "CAD"
     elif currency_selection[1]:
         return "MXN"
     else:
+        sg.popup_error("Unknown error")
         raise Exception("Unknown error!")
 
 def get_exchange_rate(currency_type):
@@ -93,6 +95,8 @@ def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate) -> pd.Da
 def output_to_txt(converted_df: pd.DataFrame, filename):
     '''Outputs the dataframe to tab delimited text file using the prefix + filename'''
     converted_df.to_csv("Converted_" + filename + ".txt", sep = '\t', index=False)
+    sg.popup('File saved as Converted_' + filename + '.txt')
+    '''
     layout = [[sg.Text('File saved as "Converted_' + filename + ".txt")],
           [sg.Button('Thanks!')]]
     window = sg.Window('Success!', layout)
@@ -100,6 +104,7 @@ def output_to_txt(converted_df: pd.DataFrame, filename):
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Thanks!':
             break
+            '''
 
 def main():
     settlement_df = get_flatfile_input()
