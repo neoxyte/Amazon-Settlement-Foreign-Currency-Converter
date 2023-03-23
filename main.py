@@ -61,11 +61,36 @@ def ask_for_currency_type():
     elif currency_selection[1]:
         return "MXN"
     else:
-        return None
+        raise Exception("Error, invalid selection")
+        return False
+
+def get_exchange_rate(currency_type):
+    '''Gets the current exchange rate from exchangerate-api.com'''
+    if currency_type == "CAD":
+        url = "https://v6.exchangerate-api.com/v6/dccb484c0029bcd76c5b3a87/latest/CAD"
+        response = requests.get(url)
+        data = response.json()
+        conversion_rate = data["conversion_rates"]["USD"]
+        return conversion_rate
+    elif currency_type == "MXN":
+        url = "https://v6.exchangerate-api.com/v6/dccb484c0029bcd76c5b3a87/latest/MXN"
+        response = requests.get(url)
+        data = response.json()
+        conversion_rate = data["conversion_rates"]["USD"]
+        return conversion_rate
+    else:
+        raise Exception("Error, unable to convert currency")
+
+def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate) -> pd.DataFrame:
+    '''Accepts the settlement flatfile dataframe and exchange rate as arguments'''
+    return settlement_dataframe
 
 def main():
-    get_flatfile_input()
+    settlement_df= get_flatfile_input()
     currency_type = ask_for_currency_type()
+    exchange_rate = get_exchange_rate(currency_type)
+    converted_df = convert_currency(settlement_df, exchange_rate)
+    print(converted_df)
 
 if __name__ == "__main__":
     main()
