@@ -73,13 +73,13 @@ def ask_for_currency_type():
 def get_exchange_rate(currency_type):
     '''Gets the current exchange rate from exchangerate-api.com'''
     if currency_type == "CAD":
-        url = "https://v6.exchangerate-api.com/v6/API_KEY/latest/CAD"
+        url = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/CAD"
         response = requests.get(url)
         data = response.json()
         conversion_rate = data["conversion_rates"]["USD"]
         return conversion_rate
     elif currency_type == "MXN":
-        url = "https://v6.exchangerate-api.com/v6/API_KEY/latest/MXN"
+        url = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/MXN"
         response = requests.get(url)
         data = response.json()
         conversion_rate = data["conversion_rates"]["USD"]
