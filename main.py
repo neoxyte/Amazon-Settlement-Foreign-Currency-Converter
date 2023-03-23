@@ -32,7 +32,7 @@ dtypes = {
 API_KEY = 'dccb484c0029bcd76c5b3a87' #API key for exchangerate-api.com
 
 def get_flatfile_input():
-    '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface'''
+    '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface. Returns a list c'''
     flatfile_form = sg.FlexForm('Settlement Analyzer') 
     layout = [
           [sg.Text('Please select Flat File (v2)')],
@@ -41,9 +41,10 @@ def get_flatfile_input():
          ]
     button, filename = flatfile_form.Layout(layout).Read() 
     flat_file = filename['Browse']
+    file_name = flat_file.rsplit('/', 1)[-1][:-4] #this gets only the file name without the full path / file extension
     flatfile_form.close()
     settlement_df = pd.read_table(flat_file, sep='\t', dtype=dtypes)
-    return settlement_df
+    return [settlement_df, file_name]
 
 def ask_for_currency_type():
     '''Asks for currency type to exchange from (CAD or MXN) via GUI menu radio buttons'''
@@ -83,14 +84,17 @@ def get_exchange_rate(currency_type):
 
 def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate) -> pd.DataFrame:
     '''Accepts the settlement flatfile dataframe and exchange rate as arguments'''
+    settlement_dataframe['amount'] = settlement_dataframe['amount'] * exchange_rate
     return settlement_dataframe
 
 def main():
-    settlement_df= get_flatfile_input()
+    settlement_df = get_flatfile_input()
+    file_name = settlement_df[1] #gets the file name
+    settlement_df = settlement_df[0] #overwrites the variable now that we have the filename
     currency_type = ask_for_currency_type()
     exchange_rate = get_exchange_rate(currency_type)
     converted_df = convert_currency(settlement_df, exchange_rate)
-    print(converted_df)
+    print(converted_df['amount'])
 
 if __name__ == "__main__":
     main()
