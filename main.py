@@ -29,10 +29,10 @@ dtypes = {
     "promotion-id": "category",
 }
 
-API_KEY = 'HIDDEN' #API key for exchangerate-api.com
+API_KEY = '' #API key for exchangerate-api.com
 
 def get_flatfile_input():
-    '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface. Returns a list c'''
+    '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface. Returns a list consting of the file and the filename'''
     flatfile_form = sg.FlexForm('Settlement Currency Exchange') 
     layout = [
           [sg.Text('Please select Flat File (v2)')],
@@ -73,13 +73,13 @@ def ask_for_currency_type():
 def get_exchange_rate(currency_type):
     '''Gets the current exchange rate from exchangerate-api.com'''
     if currency_type == "CAD":
-        url = "https://v6.exchangerate-api.com/v6/dccb484c0029bcd76c5b3a87/latest/CAD"
+        url = "https://v6.exchangerate-api.com/v6/API_KEY/latest/CAD"
         response = requests.get(url)
         data = response.json()
         conversion_rate = data["conversion_rates"]["USD"]
         return conversion_rate
     elif currency_type == "MXN":
-        url = "https://v6.exchangerate-api.com/v6/dccb484c0029bcd76c5b3a87/latest/MXN"
+        url = "https://v6.exchangerate-api.com/v6/API_KEY/latest/MXN"
         response = requests.get(url)
         data = response.json()
         conversion_rate = data["conversion_rates"]["USD"]
