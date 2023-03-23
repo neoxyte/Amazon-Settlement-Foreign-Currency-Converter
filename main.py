@@ -90,10 +90,10 @@ def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate) -> pd.Da
     settlement_dataframe['amount'] = settlement_dataframe['amount'] * exchange_rate
     return settlement_dataframe
 
-def output_to_csv(converted_df: pd.DataFrame, filename):
-    '''Outputs the dataframe to csv using the prefix + filename'''
-    converted_df.to_csv("Converted_" + filename + ".csv")
-    layout = [[sg.Text('File saved as "Converted_' + filename + ".csv")],
+def output_to_txt(converted_df: pd.DataFrame, filename):
+    '''Outputs the dataframe to tab delimited text file using the prefix + filename'''
+    converted_df.to_csv("Converted_" + filename + ".txt", sep = '\t', index=False)
+    layout = [[sg.Text('File saved as "Converted_' + filename + ".txt")],
           [sg.Button('Thanks!')]]
     window = sg.Window('Success!', layout)
     while True:
@@ -108,7 +108,7 @@ def main():
     currency_type = ask_for_currency_type()
     exchange_rate = get_exchange_rate(currency_type)
     converted_df = convert_currency(settlement_df, exchange_rate)
-    output_to_csv(converted_df, file_name)
+    output_to_txt(converted_df, file_name)
     
 if __name__ == "__main__":
     main()
