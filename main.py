@@ -2,7 +2,6 @@ import requests
 import pandas as pd
 import PySimpleGUI as sg
 
-
 dtypes = {
     "settlement-id": "category",
     "settlement-start-date": "category",
@@ -31,7 +30,6 @@ dtypes = {
 }
 
 API_KEY = 'dccb484c0029bcd76c5b3a87' #API key for exchangerate-api.com
-
 
 def get_flatfile_input():
     '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface'''
