@@ -29,7 +29,7 @@ dtypes = {
     "promotion-id": "category",
 }
 
-API_KEY = '' #API key for exchangerate-api.com
+API_KEY = '' #API key for exchangerate-api.com / depreceated
 
 def get_flatfile_input():
     '''Asks for an Amazon Celler Central flat file payment report (v2) via GUI interface. Returns a list consting of the file and the filename'''
@@ -75,7 +75,7 @@ def ask_for_deposit_total():
     layout = [[sg.Text('Deposit Amount (USD):')],
             [sg.InputText()],
             [sg.Button('Submit')]]
-    window = sg.Window('Window Title', layout)
+    window = sg.Window('Settlement Currency Exchange', layout)
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
@@ -86,8 +86,25 @@ def ask_for_deposit_total():
     window.close()
     return values[0]
 
-def get_exchange_rate_old(currency_type):
-    '''Gets the current exchange rate from exchangerate-api.com'''
+
+def ask_for_previous_rate():
+    '''Asks for the previous deposit rate''' 
+    layout = [[sg.Text('Previous Conversion Rate')],
+            [sg.InputText()],
+            [sg.Button('Submit')]]
+    window = sg.Window('Settlement Currency Exchange', layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+        if event == 'Submit':
+            #print(f'You entered: {values[0]}')
+            break
+    window.close()
+    return values[0]
+
+'''def get_exchange_rate(currency_type):
+    Gets the current exchange rate from exchangerate-api.com
     #no longer using this
     if currency_type == "CAD":
         url = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/CAD"
@@ -102,16 +119,33 @@ def get_exchange_rate_old(currency_type):
         conversion_rate = data["conversion_rates"]["USD"]
         return conversion_rate
     else:
-        raise Exception("Error, unable to convert currency")
+        raise Exception("Error, unable to convert currency")'''
+
+
 
 def get_exchange_rate(deposit_amount, settlement_df):
     '''Gets the exchange rate used based on a USD deposit total.'''
+    #TODO dont count previous reserve
     foreign_total = settlement_df['total-amount'].sum()
-    return deposit_amount / foreign_total
+    current_rate = deposit_amount / foreign_total
+    layout = [[sg.Text('Current Conversion Rate: ' + str(current_rate))],
+            [sg.Button('Ok')]]
+    window = sg.Window('Settlement Currency Exchange', layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+        if event == 'Ok':
+            break
+    window.close()
+    return current_rate
 
-def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate) -> pd.DataFrame:
+def convert_currency(settlement_dataframe: pd.DataFrame, exchange_rate, previous_rate) -> pd.DataFrame:
     '''Accepts the settlement flatfile dataframe and exchange rate as arguments'''
-    settlement_dataframe['amount'] = settlement_dataframe['amount'] * exchange_rate
+    previous_reserve = settlement_dataframe['amount'].loc[(settlement_dataframe['amount-description']== 'Previous Reserve Amount Balance')].sum()
+    print('Previous Reserve = ' + str(previous_reserve))
+    settlement_dataframe['amount'] = settlement_dataframe['amount'] * exchange_rate 
+    settlement_dataframe['amount'].loc[(settlement_dataframe['amount-description'] == 'Previous Reserve Amount Balance')] = (settlement_dataframe['amount'].loc[(settlement_dataframe['amount-description'] == 'Previous Reserve Amount Balance')] / exchange_rate) * previous_rate
     return settlement_dataframe
 
 def output_to_txt(converted_df: pd.DataFrame, filename):
@@ -125,9 +159,11 @@ def main():
     settlement_df = settlement_df[0] #overwrites the variable now that we have the filename
     #currency_type = ask_for_currency_type()
     deposit_total = float(ask_for_deposit_total())
+    previous_rate = float(ask_for_previous_rate())
     #exchange_rate = get_exchange_rate(currency_type)
     exchange_rate = get_exchange_rate(deposit_total, settlement_df)
-    converted_df = convert_currency(settlement_df, exchange_rate)
+    #TODO Print exchange rate
+    converted_df = convert_currency(settlement_df, exchange_rate, previous_rate)
     output_to_txt(converted_df, file_name)
     
 if __name__ == "__main__":
